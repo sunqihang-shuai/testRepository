@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 为这个mapper指定一个唯一的namespace，namespace的值习惯上设置成包名+sql映射文件名，这样就能够保证namespace的值是唯一的
+   例如namespace="com.szh.mapper.personMapper"就是com.szh.mapper(包名)+personMapper(personMapper.xml文件去除后缀) -->
+<mapper namespace="com.fh.sqh.mapper.MovieMapper">
+
+    <sql id="hql">
+        <where>
+            <if test="movieName != null and movieName !=''">
+                and movieName like concat ('%',#{movieName},'%')
+            </if>
+
+            <if test="movieNum == 1 " >
+                and  movieNum > 0
+            </if>
+            <if test="movieNum ==2 " >
+                <![CDATA[and  movieNum = 0 ]]>
+            </if>
+
+
+            <if test="homeId != null and homeId != -1">
+                and tm.homeId = #{homeId}
+            </if>
+        </where>
+    </sql>
+
+    <select id="queryCount" resultType="java.lang.Long">
+        select count(*) from t_movie tm <include refid="hql"></include>
+    </select>
+
+    <select id="queryMovie" resultType="com.fh.sqh.model.Movie">
+        select * from t_movie tm
+        left join t_movie_home th on tm.homeId=th.homeId
+        <include refid="hql"></include>
+        limit #{start},#{length}
+    </select>
+
+    <select id="queryHome" resultType="com.fh.sqh.model.Home">
+        select * from t_movie_home th
+    </select>
+
+    <insert id="addMovie" parameterType="com.fh.sqh.model.Movie">
+         insert into t_movie (movieName,movieDate,movieNum,moviePrice,movieImg,homeId,userIphone)
+        values
+        (#{movieName},#{movieDate},#{movieNum},#{moviePrice},#{movieImg},#{homeId},#{userIphone})
+    </insert>
+
+    <update id="updateMovieById" parameterType="java.lang.Integer">
+         update t_movie set
+        movieNum=movieNum-1
+        where movieId=#{movieId}
+    </update>
+
+    <select id="selectMovieById" resultType="com.fh.sqh.model.Movie" parameterType="java.lang.Integer">
+        select * from t_movie where movieId=#{movieId}
+    </select>
+
+</mapper>
